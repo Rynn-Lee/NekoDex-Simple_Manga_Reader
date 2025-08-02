@@ -6,6 +6,8 @@ ThemeData myLightTheme = ThemeData(
     onPrimary: Colors.black, //Front UI text
     secondary: Colors.white70, //Background UI
     onSecondary: Colors.black87, //Background UI text
+    tertiary: Colors.deepOrangeAccent,
+    onTertiary: Colors.white
   )
 );
 
@@ -15,5 +17,7 @@ ThemeData myDarkTheme = ThemeData(
     onPrimary: Colors.white, //Front UI text
     secondary: Color(0xff212121), //Background UI
     onSecondary: Colors.white70, //Background UI text
+    tertiary: Colors.deepOrangeAccent,
+    onTertiary: Colors.white
   )
 );
