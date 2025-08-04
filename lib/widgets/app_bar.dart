@@ -21,18 +21,26 @@ class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
 
 class _MyAppBarState extends State<MyAppBar> {
   bool _isSearching = false;
-  int _selectedSource = 0;
   String _searchQuery = "";
+  late Map<String, dynamic> _selectedSource;
   final TextEditingController _searchController = TextEditingController();
 
-  final List _sources = [
-    ['MangaDex', 'lib/assets/icons/mangadex-logo.svg', MangadexController()],
-    ['MangaLib [ru]', 'lib/assets/icons/mangalib-logo.svg', MangadexController()],
+  final List<Map<String, dynamic>> _sources = [
+    {
+      "name": "MangaDex",
+      "iconPath": "lib/assets/icons/mangadex-logo.svg",
+      "controller": MangadexController()
+    },{
+      "name": "MangaLib [ru]",
+      "iconPath": "lib/assets/icons/mangalib-logo.svg",
+      "controller": MangadexController()
+    },
   ];
   
   @override
   void initState() {
     super.initState();
+    _selectedSource = _sources.first;
     _updateSystemUI();
   }
 
@@ -52,15 +60,10 @@ class _MyAppBarState extends State<MyAppBar> {
       systemNavigationBarIconBrightness: Provider.of<ThemeNotifier>(context, listen: false).themeMode == ThemeMode.dark ? Brightness.light : Brightness.dark, // Цвет иконок навигационной панели
     ));
   }
-
-  void _changeSource() {
-    setState(() {
-      _selectedSource + 1 >= _sources.length ? _selectedSource = 0 : _selectedSource++;
-    });
-  }
   
   void _onSearchSubmit() {
-    widget.fetchManga(_sources[_selectedSource][2], _searchQuery).then((value) => _searchController.clear()); // Очищаем поле();
+    final source = _sources.firstWhere((element) => element["name"] == _selectedSource["name"]);
+    widget.fetchManga(source["controller"], _searchQuery); // Очищаем поле();
     _toggleSearch();
   }
 
@@ -69,7 +72,7 @@ class _MyAppBarState extends State<MyAppBar> {
       _searchQuery = _searchController.text;
     });
   }
-
+  
   @override
   Widget build(BuildContext context) {
     final themeNotifier = Provider.of<ThemeNotifier>(context);
@@ -78,7 +81,7 @@ class _MyAppBarState extends State<MyAppBar> {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
         child: AppBar(
-            centerTitle: true,
+            centerTitle: !_isSearching && _searchQuery.isEmpty ? true : false,
             elevation: 8.0,
             surfaceTintColor: Colors.transparent,
             backgroundColor: Theme.of(context).colorScheme.primary.withAlpha(200),
@@ -86,88 +89,122 @@ class _MyAppBarState extends State<MyAppBar> {
               statusBarColor: themeNotifier.themeMode == ThemeMode.dark ? Color(0xff1f1f1f) : Colors.white,
               statusBarIconBrightness: themeNotifier.themeMode == ThemeMode.dark ? Brightness.light : Brightness.dark,
             ),
-            leading: Container(
-              margin: EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Theme.of(context).colorScheme.secondary.withAlpha(180)
-              ),
-              child: IconButton(
-                onPressed: _changeSource,
-                icon: SvgPicture.asset(_sources[_selectedSource][1], height: 24.0, width: 24.0),
-              ),
-            ),
+            leading: leadingPopupMenu(context),
             title: _isSearching ? TextField(
               controller: _searchController,
               autofocus: true,
               onChanged: _onSearchChange,
               decoration: InputDecoration(
-                hintText: 'Search on ${_sources[_selectedSource][0]}',
+                hintText: 'Search on ${_selectedSource['name']}',
                 hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withAlpha(100)),
                 border: InputBorder.none,
               ),
             )
-                : !_isSearching && _searchQuery.isEmpty
-                  ? Text("NekoDex")
-                  : Row(
-                    children: [
-                      _searchQuery.isNotEmpty
-                        ? Icon(Icons.manage_search_rounded, color: Theme.of(context).colorScheme.onSecondary, size: 22)
-                        : Container(),
-                      Text(": $_searchQuery")
-                    ],
-                  ),
+              : !_isSearching && _searchQuery.isEmpty
+                ? Text("NekoLib")
+                : TextButton(
+                  onPressed: _toggleSearch,
+                  child: Text(_searchQuery, style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),)),
             titleTextStyle: TextStyle(
               fontFamily: "Monospace",
               color: Theme.of(context).colorScheme.onPrimary,
               fontSize: 17.0,
             ),
             actions: [
-              IconButton(
-                onPressed: _toggleSearch,
-                icon: AnimatedSwitcher(
-                  duration: Duration(milliseconds: 300),
-                  transitionBuilder: (child, animation) {
-                    return SizeTransition(
-                      sizeFactor: animation,
-                      child: FadeTransition(opacity: animation, child: child),
-                    );
-                  },
-                  child: Icon(
-                    _isSearching ? Icons.search_off_rounded : Icons.search_rounded,
-                    key: ValueKey(_isSearching ? 'close' : 'search'),
-                  ),
-                ),
-              ),
-              IconButton(
-                onPressed: _isSearching ? _onSearchSubmit : _changeAppMode,
-                icon: AnimatedSwitcher(
-                  duration: Duration(milliseconds: 300),
-                  transitionBuilder: (child, animation) {
-                    return SizeTransition(
-                      sizeFactor: animation,
-                      child: FadeTransition(opacity: animation, child: child),
-                    );
-                  },
-                  child: Icon(
-                    _isSearching
-                    ? Icons.send_rounded
-                    : themeNotifier.themeMode == ThemeMode.dark
-                        ? Icons.dark_mode
-                        : Icons.light_mode,
-                    key: ValueKey(
-                      _isSearching
-                      ? 'send'
-                      : themeNotifier.themeMode == ThemeMode.dark
-                          ? 'dark'
-                          : 'light',
-                    ),
-                  ),
-                ),
-              ),
+              searchToggleButton(),
+              sendRequestAndSettings()
             ],
           ),
       ),
+    );
+  }
+
+  AnimatedSwitcher sendRequestAndSettings() {
+    return AnimatedSwitcher(
+      duration: Duration(milliseconds: 300),
+      transitionBuilder: (child, animation) {
+        return SizeTransition(
+          sizeFactor: animation,
+          child: FadeTransition(opacity: animation, child: child),
+        );
+      },
+      child: _isSearching
+        ? IconButton(
+            key: ValueKey('send'),
+            onPressed: _onSearchSubmit,
+            icon: Icon(Icons.send_rounded, color: Theme.of(context).colorScheme.onPrimary, size: 24),
+          )
+        : Container(
+          margin: EdgeInsets.only(right: 14, left: 10),
+          child: PopupMenuButton<String>(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+          surfaceTintColor: Colors.transparent,
+          color: Theme.of(context).colorScheme.primary,
+            key: ValueKey('settings'),
+            onSelected: (value) {
+              switch (value) {
+                case 'theme':
+                  _changeAppMode();
+                  break;
+                default:
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'theme',
+                child: Text('Сменить тему')
+              ),
+              PopupMenuItem(
+                value: 'about',
+                child: Text('Все настройки')
+              ),
+            ],
+            child: Icon(Icons.settings_rounded, color: Theme.of(context).colorScheme.onPrimary, size: 24),
+          ),
+        ),
+    );
+  }
+
+  IconButton searchToggleButton() {
+    return IconButton(
+      onPressed: _toggleSearch,
+      icon: AnimatedSwitcher(
+        duration: Duration(milliseconds: 300),
+        transitionBuilder: (child, animation) {
+          return SizeTransition(
+            sizeFactor: animation,
+            child: FadeTransition(opacity: animation, child: child),
+          );
+        },
+        child: Icon(
+          _isSearching ? Icons.search_off_rounded : Icons.search_rounded,
+          key: ValueKey(_isSearching ? 'close' : 'search'),
+        ),
+      ),
+    );
+  }
+
+  PopupMenuButton<Object> leadingPopupMenu(BuildContext context) {
+    return PopupMenuButton(
+      icon: SvgPicture.asset(_selectedSource['iconPath'], height: 24.0, width: 24.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+      surfaceTintColor: Colors.transparent,
+      color: Theme.of(context).colorScheme.primary,
+      onSelected: (value) {
+        setState(() {
+          _selectedSource = _sources.firstWhere((element) => element["name"] == value);
+        });
+      },
+      itemBuilder: (context) => _sources.map((source) => PopupMenuItem(
+        value: source["name"],
+        child: Row(
+          children: [
+            SvgPicture.asset(source["iconPath"], height: 24.0, width: 24.0),
+            SizedBox(width: 6,),
+            Expanded(child: Text(source["name"]))
+          ],
+        ),
+      )).toList()
     );
   }
 }

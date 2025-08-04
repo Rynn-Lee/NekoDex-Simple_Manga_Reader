@@ -27,8 +27,8 @@ class _AppHomeState extends State<AppHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_pageIndex],
       extendBody: true,
+      body: _pages[_pageIndex],
       bottomNavigationBar: MyBottomAppBar(changePage: _changePage, pageIndex: _pageIndex, pages: _pages),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:neko_dex/controllers/mangadex_controller.dart';
 import 'package:neko_dex/models/manga_model.dart';
 import 'package:neko_dex/theme/theme_motifier.dart';
+import 'package:neko_dex/utils/capitalize_first_letter.dart';
 import 'package:neko_dex/widgets/app_bar.dart';
 import 'package:provider/provider.dart';
 
@@ -45,12 +46,15 @@ class _HomePageState extends State<HomePage> {
           strokeWidth: 2,
           color: Theme.of(context).colorScheme.onPrimary,
         )) 
-        : ListView.builder(
-          itemCount: _manga.length,
-          itemBuilder: (context, index) {
-            final mangaItem = _manga[index];
-            return mangaCard(mangaItem);
-          }
+        : Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: ListView.builder(
+            itemCount: _manga.length,
+            itemBuilder: (context, index) {
+              final mangaItem = _manga[index];
+              return mangaCard(mangaItem);
+            }
+          ),
         )
     );
   }
@@ -78,7 +82,52 @@ class _HomePageState extends State<HomePage> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.network(mangaItem.coverUrl, width: 100, height: 150, fit: BoxFit.cover)
+            child: Stack(
+              children: [
+                Image.network(
+                  mangaItem.coverUrl,
+                  width: 100,
+                  height: 150,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                    if (loadingProgress == null) return child; // картинка загрузилась
+                    return Container(
+                      width: 100,
+                      height: 150,
+                      color: Theme.of(context).colorScheme.primary,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: Theme.of(context).colorScheme.onPrimary,
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  (loadingProgress.expectedTotalBytes ?? 1)
+                              : null,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  left: 0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: statusColor.color.withAlpha(200),
+                    ),
+                    child: Text(
+                      capitalizeFirstLetter(mangaItem.status),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onTertiary,
+                        fontWeight: FontWeight.bold
+                      ),
+                    ),
+                  )
+                )
+              ]
+            )
           ),
           Expanded(
             child: Padding(
@@ -151,7 +200,7 @@ class _HomePageState extends State<HomePage> {
               padding: EdgeInsets.only(left: 4, top: 2, right: 4, bottom: 2),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(4),
-                color: Theme.of(context).colorScheme.tertiary.withAlpha(160),
+                color: Theme.of(context).colorScheme.tertiary.withAlpha(180),
               ),
               child: Text(
                 tag,
