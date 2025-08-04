@@ -32,15 +32,13 @@ class _NekoDexState extends State<NekoDex> with TickerProviderStateMixin{
         statusBarColor: themeNotifier.themeMode == ThemeMode.dark ? Color(0xff1f1f1f) : Colors.white,
         statusBarIconBrightness: themeNotifier.themeMode == ThemeMode.dark ? Brightness.light : Brightness.dark,
       ),
-      child: SafeArea(
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: "NekoDex",
-          theme: myLightTheme,
-          darkTheme: myDarkTheme,
-          themeMode: themeNotifier.themeMode,
-          home:  AppHome(),
-        ),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: "NekoDex",
+        theme: myLightTheme,
+        darkTheme: myDarkTheme,
+        themeMode: themeNotifier.themeMode,
+        home:  AppHome(),
       ),
     );
   }

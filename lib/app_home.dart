@@ -40,14 +40,14 @@ class _AppHomeState extends State<AppHome> {
       unselectedItemColor: Colors.grey, // Цвет невыбранного текста и иконки
       items: [
         BottomNavigationBarItem(
-          activeIcon: Icon(Icons.home_rounded, color: Colors.orangeAccent),
-          icon: Icon(Icons.home_rounded),
-          label: "Home",
+          activeIcon: Icon(Icons.search_rounded, color: Colors.orangeAccent),
+          icon: Icon(Icons.search_rounded),
+          label: "Search",
         ),
         BottomNavigationBarItem(
           activeIcon: Icon(Icons.menu_book_rounded, color: Colors.orangeAccent),
           icon: Icon(Icons.menu_book_rounded),
-          label: "Reading",
+          label: "My Lists",
         ),
       ]
     );

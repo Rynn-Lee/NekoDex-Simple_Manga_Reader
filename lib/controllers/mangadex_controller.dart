@@ -27,7 +27,6 @@ class MangadexController extends MangaProvider {
 
     final altTitles = (attributes['altTitles'] as List).map((title) => title.values.first.toString()).toList();
     final tags = (attributes['tags'] as List).map((tag) => tag['attributes']['name']['en'].toString()).toList();
-    print("Tags : $tags");
     return Manga(
       id: json['id'],
       title: title,
@@ -35,7 +34,7 @@ class MangadexController extends MangaProvider {
       altTitles: altTitles,
       tags: tags,
       status: attributes['status'],
-      coverUrl: '$coversUrl/covers/$id/$coverUrl.512.jpg'
+      coverUrl: '$coversUrl/covers/$id/$coverUrl.256.jpg'
     );
   }
 }
