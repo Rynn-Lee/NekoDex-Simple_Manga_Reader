@@ -57,6 +57,8 @@ class _HomePageState extends State<HomePage> {
 
   Container mangaCard(Manga mangaItem) {
     final themeNotifier = Provider.of<ThemeNotifier>(context);
+    final statusColor = parseMangaStatus(mangaItem.status);
+
     return Container(
       margin: const EdgeInsets.only(top: 8, left: 8, right: 8),
       decoration: BoxDecoration(
@@ -87,49 +89,9 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      mangaItem.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Theme.of(context).colorScheme.onSecondary,
-                        fontWeight: FontWeight.bold
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Expanded(
-                      child: Text(
-                        mangaItem.description,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Theme.of(context).colorScheme.onSecondary.withAlpha(100),
-                        ),
-                      ),
-                    ),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: mangaItem.tags.map((tag) {
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 2.0),
-                            child: Container(
-                              padding: EdgeInsets.only(left: 4, top: 2, right: 4, bottom: 2),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(4),
-                                color: Theme.of(context).colorScheme.tertiary.withAlpha(160),
-                              ),
-                              child: Text(
-                                tag,
-                                style: TextStyle(color: Theme.of(context).colorScheme.onTertiary),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
+                    title(statusColor, mangaItem),
+                    description(mangaItem),
+                    tagList(mangaItem),
                   ],
                 ),
               ),
@@ -140,6 +102,65 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  
+  Row title(MangaStatus statusColor, Manga mangaItem) {
+    return Row(children: [
+      Icon(
+        Icons.circle_rounded,
+        size: 10,
+        color: statusColor.color
+      ),
+      SizedBox(width: 4),
+      Expanded(
+        child: Text(
+          mangaItem.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 18,
+            color: Theme.of(context).colorScheme.onSecondary,
+            fontWeight: FontWeight.bold
+          ),
+        ),
+      ),
+      ]
+    ,);
+  }
 
+  Expanded description(Manga mangaItem) {
+    return Expanded(
+      child: Text(
+        mangaItem.description,
+        maxLines: 4,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontSize: 14,
+          color: Theme.of(context).colorScheme.onSecondary.withAlpha(100),
+        ),
+      ),
+    );
+  }
+
+  SingleChildScrollView tagList(Manga mangaItem) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: mangaItem.tags.map((tag) {
+          return Padding(
+            padding: const EdgeInsets.only(right: 2.0),
+            child: Container(
+              padding: EdgeInsets.only(left: 4, top: 2, right: 4, bottom: 2),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4),
+                color: Theme.of(context).colorScheme.tertiary.withAlpha(160),
+              ),
+              child: Text(
+                tag,
+                style: TextStyle(color: Theme.of(context).colorScheme.onTertiary),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
 }

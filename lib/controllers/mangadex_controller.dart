@@ -34,6 +34,7 @@ class MangadexController extends MangaProvider {
       altTitles: altTitles,
       tags: tags,
       status: attributes['status'],
+      year: attributes['year'],
       coverUrl: '$coversUrl/covers/$id/$coverUrl.256.jpg'
     );
   }
