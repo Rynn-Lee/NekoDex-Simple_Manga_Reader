@@ -2,10 +2,11 @@ import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:neko_dex/models/manga_model.dart';
 import 'package:neko_dex/utils/capitalize_first_letter.dart';
-import 'package:marquee/marquee.dart';
 import 'package:neko_dex/widgets/build_scrolling_title.dart';
+import 'package:neko_dex/widgets/link_button.dart';
 
 class MangaPage extends StatelessWidget {
   final Manga manga;
@@ -23,70 +24,12 @@ class MangaPage extends StatelessWidget {
             pinned: true,
             title: SizedBox(
               height: 26,
-              child: buildScrollingTitle(manga.title, const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold), 200),
-              // Marquee(
-              //   text: manga.title,
-              //   style: const TextStyle(
-              //     fontSize: 20,
-              //     color: Colors.white,
-              //     fontWeight: FontWeight.bold
-              //   ),
-              //   scrollAxis: Axis.horizontal,
-              //   blankSpace: 130.0,
-              //   velocity: 30.0,
-              //   pauseAfterRound: Duration(seconds: 1),
-              //   startPadding: 10.0,
-              //   accelerationDuration: Duration(seconds: 1),
-              //   accelerationCurve: Curves.linear,
-              //   decelerationDuration: Duration(milliseconds: 500),
-              //   decelerationCurve: Curves.easeOut,
-              // )
+              child: buildScrollingTitle(manga.title, const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold), 290, context),
             ),
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
                 children: [
-                  Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      ImageFiltered(
-                        imageFilter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-                        child: CachedNetworkImage(
-                          imageUrl: manga.coverUrl,
-                          memCacheHeight: 256,
-                          memCacheWidth: 190,
-                          width: 200,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
-                          width: 100,
-                          height: 150,
-                          color: Theme.of(context).colorScheme.primary,
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
-                          ),
-                        ),
-                        errorWidget: (context, url, error) => Container(
-                          width: 100,
-                          height: 150,
-                          color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Theme.of(context).colorScheme.primary.withAlpha(110),
-                              Theme.of(context).colorScheme.primary.withAlpha(220),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                    ),
+                  backgroundCoverArt(context),
                   Positioned(
                     bottom: 30,
                     left: 10,
@@ -95,7 +38,67 @@ class MangaPage extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        coverArtHero(statusColor, context),
+                        SizedBox(
+                          width: 160,
+                          height: 230,
+                          child: coverArtHero(statusColor, context)
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 8.0, top: 8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                mangaInfoRow(context, 'Source: ', Row(children: [
+                                  SvgPicture.asset(manga.source.iconPath, height: 20.0, width: 20.0),
+                                  SizedBox(width: 8),
+                                  Text(manga.source.name, style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold)),
+                                  SizedBox(width: 4),
+                                  OpenLinkButton(url: manga.sourceUrl)
+                                ],)),
+                                mangaInfoRow(context, 'Status: ', Row(
+                                  children: [
+                                  Icon(
+                                    Icons.circle_rounded,
+                                    size: 10,
+                                    color: statusColor.color
+                                  ),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    capitalizeFirstLetter(manga.status),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Theme.of(context).colorScheme.onPrimary,
+                                      fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                  ]
+                                )
+                                ),
+                                mangaInfoRow(context, 'Year: ', Text(manga.year.toString(), style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold))),
+                                mangaInfoRow(context, 'Rating: ', RichText(
+                                  text: TextSpan(
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16
+                                      ),
+                                      children: [manga.contentRating.displayName]
+                                    ),
+                                  )
+                                ),
+                                mangaInfoRow(context, 'Last chapter: ', Text(
+                                  manga.lastChapter,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Theme.of(context).colorScheme.onPrimary,
+                                    fontWeight: FontWeight.bold
+                                    )
+                                  )
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
                     )
                   )
@@ -114,39 +117,97 @@ class MangaPage extends StatelessWidget {
     );
   }
 
-  Hero coverArtHero(MangaStatus statusColor, BuildContext context) {
+  Row mangaInfoRow(BuildContext context, String title, Widget info) {
+    return Row(children: [
+      Text(
+        title,
+        style: TextStyle(
+          fontSize: 18,
+          color: Theme.of(context).colorScheme.onSecondary,
+          fontWeight: FontWeight.bold
+        ),
+      ),
+      SizedBox(width: 4),
+      info
+    ],);
+  }
+
+  Stack backgroundCoverArt(BuildContext context) {
+    return Stack(
+    fit: StackFit.expand,
+    children: [
+      ImageFiltered(
+        imageFilter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+        child: CachedNetworkImage(
+          imageUrl: manga.coverUrl,
+          memCacheHeight: 256,
+          memCacheWidth: 190,
+          width: 200,
+          fit: BoxFit.cover,
+          placeholder: (context, url) => Container(
+          width: 100,
+          height: 150,
+          color: Theme.of(context).colorScheme.primary,
+          child: Center(
+            child: CircularProgressIndicator(
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+          ),
+        ),
+        errorWidget: (context, url, error) => Container(
+          width: 100,
+          height: 150,
+          color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+      ),
+      Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).colorScheme.primary.withAlpha(110),
+              Theme.of(context).colorScheme.primary.withAlpha(220),
+            ],
+          ),
+        ),
+      ),
+    ],
+    );
+  }
+
+  Widget coverArtHero(MangaStatus statusColor, BuildContext context, {double? width, double? height}) {
     return Hero(
       tag: manga.id,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: Stack(
           children: [
-            CachedNetworkImage(
-              imageUrl: manga.coverUrl,
-              memCacheHeight: 256,
-              memCacheWidth: 190,
-              width: 160,
-              fit: BoxFit.fill,
-              placeholder: (context, url) => Container(
-                width: 100,
-                height: 150,
-                color: Theme.of(context).colorScheme.primary,
-                child: Center(
-                  child: CircularProgressIndicator(
+            Positioned.fill(
+              child: CachedNetworkImage(
+                imageUrl: manga.coverUrl,
+                fit: BoxFit.cover,
+                memCacheHeight: 256,
+                memCacheWidth: 190,
+                placeholder: (context, url) => Container(
+                  color: Theme.of(context).colorScheme.primary,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  color: Theme.of(context).colorScheme.primary,
+                  child: Icon(
+                    Icons.broken_image,
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),
                 ),
               ),
-              errorWidget: (context, url, error) => Container(
-                width: 100,
-                height: 150,
-                color: Theme.of(context).colorScheme.primary,
-                child: Icon(
-                  Icons.broken_image,
-                  color: Theme.of(context).colorScheme.onPrimary,
-                ),
-              ),
             ),
+            // Полоса с текстом внизу
             Positioned(
               bottom: 0,
               right: 0,

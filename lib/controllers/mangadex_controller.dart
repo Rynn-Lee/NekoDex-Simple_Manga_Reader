@@ -76,21 +76,18 @@ List<Manga> _parseMangaList (String body) {
         .toList();
 
     return Manga(
-      source: {
-        "name": "MangaDex",
-        "iconPath": "lib/assets/icons/mangadex-logo.svg",
-        "controller": MangadexController()
-      },
+      source: Source(controller: MangadexController(), name: 'Mangadex', iconPath: 'lib/assets/icons/mangadex-logo.svg'),
+      sourceUrl: 'https://mangadex.org/title/$id',
+      contentRating: ContentRating.fromApi(attributes['contentRating']),
       id: manga['id'],
       title: title,
       description: description.split("\n").first,
       altTitles: altTitles,
       tags: tags,
+      lastChapter: (attributes['lastChapter'] ?? '').isNotEmpty ? attributes['lastChapter'] : 'N/A',
       status: attributes['status'],
-      year: attributes['year'],
-      coverUrl: coverArt != null
-        ? '${MangadexController.coversUrl}/covers/$id/$coverArt.256.jpg'
-        : ''
+      year: (attributes['year'].toString()).isNotEmpty ? attributes['year'].toString() : 'N/A',
+      coverUrl: coverArt != null ? '${MangadexController.coversUrl}/covers/$id/$coverArt.256.jpg' : ''
     );
   }).toList();
 }

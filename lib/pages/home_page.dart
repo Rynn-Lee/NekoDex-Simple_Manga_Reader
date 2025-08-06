@@ -161,7 +161,11 @@ class _HomePageState extends State<HomePage> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            coverArtHero(mangaItem, statusColor),
+            SizedBox(
+              width: 105,
+              height: 210,
+              child: coverArtHero(mangaItem, statusColor)
+            ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -192,33 +196,31 @@ class _HomePageState extends State<HomePage> {
         borderRadius: BorderRadius.circular(8),
         child: Stack(
           children: [
-            CachedNetworkImage(
-              imageUrl: mangaItem.coverUrl,
-              memCacheHeight: 256,
-              memCacheWidth: 190,
-              width: 100,
-              height: 150,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => Container(
-                width: 100,
-                height: 150,
-                color: Theme.of(context).colorScheme.primary,
-                child: Center(
-                  child: CircularProgressIndicator(
+            // Адаптивный размер через Positioned.fill
+            Positioned.fill(
+              child: CachedNetworkImage(
+                imageUrl: mangaItem.coverUrl,
+                fit: BoxFit.cover,
+                memCacheHeight: 256,
+                memCacheWidth: 190,
+                placeholder: (context, url) => Container(
+                  color: Theme.of(context).colorScheme.primary,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  color: Theme.of(context).colorScheme.primary,
+                  child: Icon(
+                    Icons.broken_image,
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),
                 ),
               ),
-              errorWidget: (context, url, error) => Container(
-                width: 100,
-                height: 150,
-                color: Theme.of(context).colorScheme.primary,
-                child: Icon(
-                  Icons.broken_image,
-                  color: Theme.of(context).colorScheme.onPrimary,
-                ),
-              ),
             ),
+            // Полоса с текстом внизу
             Positioned(
               bottom: 0,
               right: 0,
@@ -289,22 +291,40 @@ class _HomePageState extends State<HomePage> {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        children: mangaItem.tags.map((tag) {
-          return Padding(
+        children: [
+          Padding(
             padding: const EdgeInsets.only(right: 2.0),
             child: Container(
-              padding: EdgeInsets.only(left: 4, top: 2, right: 4, bottom: 2),
+              padding: EdgeInsets.only(left: 4, top: 4, right: 4, bottom: 4),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(4),
-                color: Theme.of(context).colorScheme.tertiary.withAlpha(180),
+                color: mangaItem.contentRating.color.withAlpha(180),
               ),
-              child: Text(
-                tag,
+              child: RichText(
+                text: TextSpan(
+                text: mangaItem.contentRating.displayName.text,
                 style: TextStyle(color: Theme.of(context).colorScheme.onTertiary),
+                )
               ),
-            ),
-          );
-        }).toList(),
+            )
+          ),
+          ...mangaItem.tags.map((tag) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 2.0),
+              child: Container(
+                padding: EdgeInsets.only(left: 4, top: 2, right: 4, bottom: 2),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                  color: Theme.of(context).colorScheme.tertiary.withAlpha(180),
+                ),
+                child: Text(
+                  tag,
+                  style: TextStyle(color: Theme.of(context).colorScheme.onTertiary),
+                ),
+              ),
+            );
+          })
+        ],
       ),
     );
   }

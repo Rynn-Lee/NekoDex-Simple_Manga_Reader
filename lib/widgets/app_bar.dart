@@ -22,19 +22,12 @@ class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
 class _MyAppBarState extends State<MyAppBar> {
   bool _isSearching = false;
   String _searchQuery = "";
-  late Map<String, dynamic> _selectedSource;
   final TextEditingController _searchController = TextEditingController();
+  late Source _selectedSource;
 
-  final List<Map<String, dynamic>> _sources = [
-    {
-      "name": "MangaDex",
-      "iconPath": "lib/assets/icons/mangadex-logo.svg",
-      "controller": MangadexController()
-    },{
-      "name": "MangaLib [ru]",
-      "iconPath": "lib/assets/icons/mangalib-logo.svg",
-      "controller": MangadexController()
-    },
+  final List<Source> _sources = [
+    Source(name: "Mangadex", iconPath: "lib/assets/icons/mangadex-logo.svg", controller: MangadexController()),
+    Source(name: "MangaLib [ru]", iconPath: "lib/assets/icons/mangalib-logo.svg", controller: MangadexController()),
   ];
   
   @override
@@ -62,8 +55,8 @@ class _MyAppBarState extends State<MyAppBar> {
   }
   
   void _onSearchSubmit() {
-    final source = _sources.firstWhere((element) => element["name"] == _selectedSource["name"]);
-    widget.fetchManga(source["controller"], _searchQuery); // Очищаем поле();
+    final Source source = _sources.firstWhere((element) => element.name == _selectedSource.name);
+    widget.fetchManga(source.controller, _searchQuery); // Очищаем поле();
     _toggleSearch();
   }
 
@@ -94,9 +87,10 @@ class _MyAppBarState extends State<MyAppBar> {
               controller: _searchController,
               onSubmitted: (_) => _onSearchSubmit(),
               autofocus: true,
+              cursorColor: Theme.of(context).colorScheme.onPrimary,
               onChanged: _onSearchChange,
               decoration: InputDecoration(
-                hintText: 'Search on ${_selectedSource['name']}',
+                hintText: 'Search on ${_selectedSource.name}',
                 hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withAlpha(100)),
                 border: InputBorder.none,
               ),
@@ -203,22 +197,22 @@ class _MyAppBarState extends State<MyAppBar> {
 
   PopupMenuButton<Object> leadingPopupMenu(BuildContext context) {
     return PopupMenuButton(
-      icon: SvgPicture.asset(_selectedSource['iconPath'], height: 24.0, width: 24.0),
+      icon: SvgPicture.asset(_selectedSource.iconPath, height: 24.0, width: 24.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       surfaceTintColor: Colors.transparent,
       color: Theme.of(context).colorScheme.primary,
       onSelected: (value) {
         setState(() {
-          _selectedSource = _sources.firstWhere((element) => element["name"] == value);
+          _selectedSource = _sources.firstWhere((element) => element.name == value);
         });
       },
       itemBuilder: (context) => _sources.map((source) => PopupMenuItem(
-        value: source["name"],
+        value: source.name,
         child: Row(
           children: [
-            SvgPicture.asset(source["iconPath"], height: 24.0, width: 24.0),
+            SvgPicture.asset(source.iconPath, height: 24.0, width: 24.0),
             SizedBox(width: 6,),
-            Expanded(child: Text(source["name"]))
+            Expanded(child: Text(source.name))
           ],
         ),
       )).toList()
