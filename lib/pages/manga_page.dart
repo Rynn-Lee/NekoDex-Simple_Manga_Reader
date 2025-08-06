@@ -24,7 +24,7 @@ class MangaPage extends StatelessWidget {
             pinned: true,
             title: SizedBox(
               height: 26,
-              child: buildScrollingTitle(manga.title, const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold), 290, context),
+              child: buildScrollingTitle(manga.title, TextStyle(fontSize: 20, color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold), 290, context),
             ),
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
@@ -76,16 +76,32 @@ class MangaPage extends StatelessWidget {
                                 )
                                 ),
                                 mangaInfoRow(context, 'Year: ', Text(manga.year.toString(), style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold))),
-                                mangaInfoRow(context, 'Rating: ', RichText(
-                                  text: TextSpan(
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16
-                                      ),
-                                      children: [manga.contentRating.displayName]
+                                mangaInfoRow(context, 'Rating: ', Padding(padding: const EdgeInsets.only(right: 2.0),
+                                  child: Container(
+                                    padding: EdgeInsets.only(left: 4, top: 4, right: 4, bottom: 4),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(4),
+                                      color: manga.contentRating.color.withAlpha(220),
+                                    ),
+                                    child: RichText(
+                                      text: TextSpan(
+                                      text: manga.contentRating.displayName.text,
+                                      style: TextStyle(color: Theme.of(context).colorScheme.onTertiary),
+                                      )
                                     ),
                                   )
-                                ),
+                                )),
+                                mangaInfoRow(context, 'Score: ', Container(padding: EdgeInsets.only(left: 2, top: 1, right: 4, bottom: 1),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(4),
+                                    color: Theme.of(context).colorScheme.primary.withAlpha(200),
+                                  ),
+                                  child: Row(children: [
+                                      Icon(Icons.star_outline_rounded, color: Theme.of(context).colorScheme.onPrimary, size: 20),
+                                      Text(manga.score.toStringAsFixed(2), style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold))
+                                    ]
+                                  ),
+                                )),
                                 mangaInfoRow(context, 'Last chapter: ', Text(
                                   manga.lastChapter,
                                   style: TextStyle(
@@ -107,9 +123,22 @@ class MangaPage extends StatelessWidget {
             )
           ),
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(manga.description),
+            child: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.secondary,
+                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12))
+                  ),
+                  child: tagList(context, manga.tags),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Text(manga.description, style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSecondary,)),
+                ),
+              ],
             ),
           )
         ]
@@ -208,30 +237,57 @@ class MangaPage extends StatelessWidget {
               ),
             ),
             // Полоса с текстом внизу
-            Positioned(
-              bottom: 0,
-              right: 0,
-              left: 0,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: statusColor.color.withAlpha(200),
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: Text(
-                    capitalizeFirstLetter(manga.status),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.onTertiary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            // Positioned(
+            //   bottom: 0,
+            //   right: 0,
+            //   left: 0,
+            //   child: Container(
+            //     decoration: BoxDecoration(
+            //       color: statusColor.color.withAlpha(200),
+            //     ),
+            //     child: Material(
+            //       color: Colors.transparent,
+            //       child: Text(
+            //         capitalizeFirstLetter(manga.status),
+            //         textAlign: TextAlign.center,
+            //         style: TextStyle(
+            //           fontSize: 12,
+            //           color: Theme.of(context).colorScheme.onTertiary,
+            //           fontWeight: FontWeight.bold,
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ],
         ),
+      ),
+    );
+  }
+ 
+  SingleChildScrollView tagList(BuildContext context, List<String> tags) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.only(top: 4, bottom: 4, left: 4),
+      child: Row(
+        children: [
+          ...tags.map((tag) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 2.0),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                  color: Theme.of(context).colorScheme.onSecondary,
+                ),
+                child: Text(
+                  tag,
+                  style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+                ),
+              ),
+            );
+          })
+        ],
       ),
     );
   }

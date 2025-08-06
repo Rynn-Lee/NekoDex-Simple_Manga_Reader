@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -26,6 +27,7 @@ class _HomePageState extends State<HomePage> {
   bool _isLoadingMore = false;
   bool _endOfList = false;
   int page = 0;
+  Timer? _scrollDebounce;
 
   @override
   void initState() {
@@ -33,10 +35,25 @@ class _HomePageState extends State<HomePage> {
     fetchManga(MangadexController(), _searchQuery);
 
     _scrollController.addListener(() {
-      if (page == 0 ? (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) : (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 700) && !_endOfList) {
-        addManga(MangadexController(), _searchQuery);
-      }
+      if (_scrollDebounce?.isActive ?? false) return;
+      _scrollDebounce = Timer(const Duration(milliseconds: 500), () {
+        final position = _scrollController.position;
+        final triggerPosition = page == 0
+            ? position.maxScrollExtent
+            : position.maxScrollExtent - 700;
+
+        if (!_endOfList && position.pixels >= triggerPosition) {
+          addManga(MangadexController(), _searchQuery);
+        }
+      });
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollDebounce?.cancel();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> fetchManga(MangaProvider controller, String searchQuery) async {
@@ -196,7 +213,6 @@ class _HomePageState extends State<HomePage> {
         borderRadius: BorderRadius.circular(8),
         child: Stack(
           children: [
-            // Адаптивный размер через Positioned.fill
             Positioned.fill(
               child: CachedNetworkImage(
                 imageUrl: mangaItem.coverUrl,
@@ -220,7 +236,24 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            // Полоса с текстом внизу
+            Positioned(
+              top: 0,
+              left: 0,
+              child: Container(
+                padding: EdgeInsets.only(top: 2, bottom: 2, left: 4, right: 6),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(bottomRight: Radius.circular(8)),
+                  color: Theme.of(context).colorScheme.primary.withAlpha(200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.star_outline_rounded, color: Theme.of(context).colorScheme.onPrimary, size: 16),
+                    SizedBox(width: 2),
+                    Material(child: Text(mangaItem.score.toStringAsFixed(2), style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold)))
+                  ]
+                ),
+              ),
+            ),
             Positioned(
               bottom: 0,
               right: 0,
@@ -295,7 +328,7 @@ class _HomePageState extends State<HomePage> {
           Padding(
             padding: const EdgeInsets.only(right: 2.0),
             child: Container(
-              padding: EdgeInsets.only(left: 4, top: 4, right: 4, bottom: 4),
+              padding: const EdgeInsets.only(left: 4, top: 4, right: 4, bottom: 4),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(4),
                 color: mangaItem.contentRating.color.withAlpha(180),
@@ -312,7 +345,7 @@ class _HomePageState extends State<HomePage> {
             return Padding(
               padding: const EdgeInsets.only(right: 2.0),
               child: Container(
-                padding: EdgeInsets.only(left: 4, top: 2, right: 4, bottom: 2),
+                padding: const EdgeInsets.only(left: 4, top: 2, right: 4, bottom: 2),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(4),
                   color: Theme.of(context).colorScheme.tertiary.withAlpha(180),

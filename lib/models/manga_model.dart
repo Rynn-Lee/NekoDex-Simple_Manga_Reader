@@ -25,6 +25,7 @@ class Manga {
   final Source source;
   final String lastChapter;
   final ContentRating contentRating;
+  final double score;
 
   Manga({
     required this.id,
@@ -38,7 +39,8 @@ class Manga {
     required this.coverUrl,
     required this.source,
     required this.lastChapter,
-    required this.contentRating
+    required this.contentRating,
+    required this.score
   });
 }
 

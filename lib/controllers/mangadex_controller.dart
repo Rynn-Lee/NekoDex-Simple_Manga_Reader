@@ -9,7 +9,7 @@ class MangadexController extends MangaProvider {
   
   @override
   Future<List<Manga>> searchManga(String title, int page) async {
-    final parseURL = Uri.parse('$baseUrl/manga?title=$title&includes[]=cover_art&limit=10&offset=${page * 10}');
+    final parseURL = Uri.parse('$baseUrl/manga?title=$title&includes[]=cover_art&limit=10&offset=${page * 10}&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic');
     final response = await http.get(parseURL);
     if (response.statusCode != 200) throw Exception('Failed to load manga');
     return await compute(_parseMangaList, response.body);
@@ -40,7 +40,6 @@ String getPreferredTitle(Map<String, dynamic> attributes) {
   return 'No title';
 }
 
-
 String getPreferredDescription(Map<String, dynamic> attributes) {
   final descMap = attributes['description'] as Map<String, dynamic>? ?? {};
   if (descMap.containsKey('en')) return descMap['en'];
@@ -50,44 +49,55 @@ String getPreferredDescription(Map<String, dynamic> attributes) {
   return 'No description';
 }
 
+Future<double> parseMangaScore(String id) async {
+  final Uri parseURL = Uri.parse('${MangadexController.baseUrl}/statistics/manga/$id');
+  final response = await http.get(parseURL);
+  if (response.statusCode != 200) throw Exception('Failed to load manga');
+  return jsonDecode(response.body)['statistics'][id]['rating']['bayesian'];
+}
 
-List<Manga> _parseMangaList (String body) {
+Future<List<Manga>> _parseMangaList (String body) async {
   final json = jsonDecode(body);
   final List data = json['data'];
 
-  return data.map((manga) {
-    final attributes = manga['attributes'] as Map<String, dynamic>;
-    final String title = getPreferredTitle(attributes);
-    final String description = getPreferredDescription(attributes);
-    final String id = manga['id'];
-    final relationships = manga['relationships'];
-    
-    final coverArt = relationships.firstWhere(
-      (relationship) => relationship['type'] == 'cover_art',
-      orElse: () => null
-    )?['attributes']?['fileName'];
+  final mangas = await Future.wait(
+    data.map((manga) async {
+      final attributes = manga['attributes'] as Map<String, dynamic>;
+      final String title = getPreferredTitle(attributes);
+      final String description = getPreferredDescription(attributes);
+      final String id = manga['id'];
+      final relationships = manga['relationships'];
+      final score = await parseMangaScore(id);
+      
+      final coverArt = relationships.firstWhere(
+        (relationship) => relationship['type'] == 'cover_art',
+        orElse: () => null
+      )?['attributes']?['fileName'];
 
-    final altTitles = (attributes['altTitles'] as List)
-        .map((title) => title.values.first.toString())
-        .toList();
+      final altTitles = (attributes['altTitles'] as List)
+          .map((title) => title.values.first.toString())
+          .toList();
 
-    final tags = (attributes['tags'] as List)
-        .map((tag) => tag['attributes']['name']['en'].toString())
-        .toList();
+      final tags = (attributes['tags'] as List)
+          .map((tag) => tag['attributes']['name']['en'].toString())
+          .toList();
 
-    return Manga(
-      source: Source(controller: MangadexController(), name: 'Mangadex', iconPath: 'lib/assets/icons/mangadex-logo.svg'),
-      sourceUrl: 'https://mangadex.org/title/$id',
-      contentRating: ContentRating.fromApi(attributes['contentRating']),
-      id: manga['id'],
-      title: title,
-      description: description.split("\n").first,
-      altTitles: altTitles,
-      tags: tags,
-      lastChapter: (attributes['lastChapter'] ?? '').isNotEmpty ? attributes['lastChapter'] : 'N/A',
-      status: attributes['status'],
-      year: (attributes['year'].toString()).isNotEmpty ? attributes['year'].toString() : 'N/A',
-      coverUrl: coverArt != null ? '${MangadexController.coversUrl}/covers/$id/$coverArt.256.jpg' : ''
-    );
-  }).toList();
+      return Manga(
+        source: Source(controller: MangadexController(), name: 'Mangadex', iconPath: 'lib/assets/icons/mangadex-logo.svg'),
+        sourceUrl: 'https://mangadex.org/title/$id',
+        contentRating: ContentRating.fromApi(attributes['contentRating']),
+        id: manga['id'],
+        title: title,
+        description: description,
+        score: score,
+        altTitles: altTitles,
+        tags: tags,
+        lastChapter: (attributes['lastChapter'] ?? '').isNotEmpty ? attributes['lastChapter'] : 'N/A',
+        status: attributes['status'],
+        year: (attributes['year'] != null && attributes['year'].toString().isNotEmpty) ? attributes['year'].toString()  : 'N/A',
+        coverUrl: coverArt != null ? '${MangadexController.coversUrl}/covers/$id/$coverArt.256.jpg' : ''
+      );
+    }).toList()
+  );
+  return mangas;
 }

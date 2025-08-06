@@ -1,4 +1,4 @@
-package com.example.neko_dex
+package dev.nekorynn.nekolib
 
 import io.flutter.embedding.android.FlutterActivity
 
