@@ -92,6 +92,7 @@ class _MyAppBarState extends State<MyAppBar> {
             leading: leadingPopupMenu(context),
             title: _isSearching ? TextField(
               controller: _searchController,
+              onSubmitted: (_) => _onSearchSubmit(),
               autofocus: true,
               onChanged: _onSearchChange,
               decoration: InputDecoration(
@@ -120,6 +121,7 @@ class _MyAppBarState extends State<MyAppBar> {
   }
 
   AnimatedSwitcher sendRequestAndSettings() {
+    final themeNotifier = Provider.of<ThemeNotifier>(context);
     return AnimatedSwitcher(
       duration: Duration(milliseconds: 300),
       transitionBuilder: (child, animation) {
@@ -146,17 +148,32 @@ class _MyAppBarState extends State<MyAppBar> {
                 case 'theme':
                   _changeAppMode();
                   break;
+                case 'settings':
+                  Navigator.pushNamed(context, '/settings');
+                  break;
                 default:
               }
             },
             itemBuilder: (context) => [
               PopupMenuItem(
                 value: 'theme',
-                child: Text('Сменить тему')
+                child: Row(
+                  children: [
+                    Icon(themeNotifier.themeMode == ThemeMode.dark ? Icons.dark_mode_rounded : Icons.light_mode_rounded, color: Theme.of(context).colorScheme.onPrimary, size: 24),
+                    SizedBox(width: 8),
+                    Text('Сменить тему'),
+                  ],
+                )
               ),
               PopupMenuItem(
-                value: 'about',
-                child: Text('Все настройки')
+                value: 'settings',
+                child: Row(
+                  children: [
+                    Icon(Icons.settings_rounded, color: Theme.of(context).colorScheme.onPrimary, size: 24),
+                    SizedBox(width: 8),
+                    Text('Все настройки'),
+                  ],
+                )
               ),
             ],
             child: Icon(Icons.settings_rounded, color: Theme.of(context).colorScheme.onPrimary, size: 24),

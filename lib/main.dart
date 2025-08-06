@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:neko_dex/app_home.dart';
+import 'package:neko_dex/models/manga_model.dart';
+import 'package:neko_dex/pages/manga_page.dart';
+import 'package:neko_dex/pages/settings_page.dart';
 import 'package:neko_dex/theme/theme_motifier.dart';
 import 'package:neko_dex/theme/themes.dart';
 import 'package:provider/provider.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(
     ChangeNotifierProvider(
       create: (_) => ThemeNotifier(),
@@ -38,7 +42,14 @@ class _NekoDexState extends State<NekoDex> with TickerProviderStateMixin{
         theme: myLightTheme,
         darkTheme: myDarkTheme,
         themeMode: themeNotifier.themeMode,
-        home:  AppHome(),
+        routes: {
+          '/': (context) => AppHome(),
+          '/settings': (context) => SettingsPage(),
+          '/manga': (context) {
+            final Manga manga = ModalRoute.of(context)!.settings.arguments as Manga;
+            return MangaPage(manga: manga);
+          },
+        },
       ),
     );
   }

@@ -5,7 +5,6 @@ import 'package:neko_dex/widgets/bottom_app_bar.dart';
 
 class AppHome extends StatefulWidget {
   const AppHome({super.key});
-
   @override
   State<AppHome> createState() => _AppHomeState();
 }

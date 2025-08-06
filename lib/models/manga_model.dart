@@ -9,6 +9,7 @@ class Manga {
   final int? year;
   final List<String> tags;
   final String coverUrl;
+  final Map<String, dynamic> source;
 
   Manga({
     required this.title,
@@ -18,12 +19,13 @@ class Manga {
     required this.altTitles,
     required this.tags,
     required this.coverUrl,
-    required this.year
+    required this.year,
+    required this.source
   });
 }
 
 abstract class MangaProvider {
-  Future<List<Manga>> searchManga(String title);
+  Future<List<Manga>> searchManga(String title, int page);
 }
 
 enum MangaStatus {
