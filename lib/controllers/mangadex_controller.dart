@@ -9,7 +9,26 @@ class MangadexController extends MangaProvider {
   
   @override
   Future<List<Manga>> searchManga(String title, int page) async {
-    final parseURL = Uri.parse('$baseUrl/manga?title=$title&includes[]=cover_art&limit=10&offset=${page * 10}&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic');
+    final queryParams = {
+      'title': title,
+      'includes[]': 'cover_art',
+      'limit': '10',
+      'offset': '${page * 10}',
+      'contentRating[]': [
+        'safe',
+        'suggestive',
+        'erotica',
+        'pornographic',
+      ],
+    };
+
+    final parseURL = Uri(
+      scheme: 'https',
+      host: baseUrl.replaceAll('https://', ''),
+      path: '/manga',
+      queryParameters: queryParams,
+    );
+    
     final response = await http.get(parseURL);
     if (response.statusCode != 200) throw Exception('Failed to load manga');
     return await compute(_parseMangaList, response.body);
