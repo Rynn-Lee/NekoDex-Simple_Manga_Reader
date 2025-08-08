@@ -4,17 +4,17 @@ import 'package:neko_dex/app_home.dart';
 import 'package:neko_dex/models/manga_model.dart';
 import 'package:neko_dex/pages/manga_page.dart';
 import 'package:neko_dex/pages/settings_page.dart';
+import 'package:neko_dex/stores/search_preferences.dart';
 import 'package:neko_dex/theme/theme_motifier.dart';
 import 'package:neko_dex/theme/themes.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SearchPreferences.instance.init();
+
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeNotifier(),
-      child: NekoDex(),
-    ),
+    ChangeNotifierProvider(create: (_) => ThemeNotifier(), child: NekoDex()),
   );
 }
 
@@ -25,16 +25,21 @@ class NekoDex extends StatefulWidget {
   State<NekoDex> createState() => _NekoDexState();
 }
 
-class _NekoDexState extends State<NekoDex> with TickerProviderStateMixin{
-
+class _NekoDexState extends State<NekoDex> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final themeNotifier = Provider.of<ThemeNotifier>(context);
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
-        systemNavigationBarColor: themeNotifier.themeMode == ThemeMode.dark ? Color(0xff1f1f1f) : Colors.white,
-        statusBarColor: themeNotifier.themeMode == ThemeMode.dark ? Color(0xff1f1f1f) : Colors.white,
-        statusBarIconBrightness: themeNotifier.themeMode == ThemeMode.dark ? Brightness.light : Brightness.dark,
+        systemNavigationBarColor: themeNotifier.themeMode == ThemeMode.dark
+            ? Color(0xff1f1f1f)
+            : Colors.white,
+        statusBarColor: themeNotifier.themeMode == ThemeMode.dark
+            ? Color(0xff1f1f1f)
+            : Colors.white,
+        statusBarIconBrightness: themeNotifier.themeMode == ThemeMode.dark
+            ? Brightness.light
+            : Brightness.dark,
       ),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -46,7 +51,8 @@ class _NekoDexState extends State<NekoDex> with TickerProviderStateMixin{
           '/': (context) => AppHome(),
           '/settings': (context) => SettingsPage(),
           '/manga': (context) {
-            final Manga manga = ModalRoute.of(context)!.settings.arguments as Manga;
+            final Manga manga =
+                ModalRoute.of(context)!.settings.arguments as Manga;
             return MangaPage(manga: manga);
           },
         },

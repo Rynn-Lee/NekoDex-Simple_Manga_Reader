@@ -1,35 +1,32 @@
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
+import 'package:neko_dex/stores/search_preferences.dart';
 import 'dart:convert';
 import '../models/manga_model.dart';
 
 class MangadexController extends MangaProvider {
   static String baseUrl = 'https://api.mangadex.org';
   static String coversUrl = 'https://uploads.mangadex.org';
-  
+
   @override
   Future<List<Manga>> searchManga(String title, int page) async {
-    final queryParams = {
+    final ratings = SearchPreferences.instance.selectedContentRatings;
+
+    final queryParams = <String, dynamic>{
       'title': title,
-      'includes[]': 'cover_art',
+      'includes[]': ['cover_art'],
       'limit': '10',
       'offset': '${page * 10}',
-      'contentRating[]': [
-        'safe',
-        'suggestive',
-        'erotica',
-        'pornographic',
-      ],
+      'contentRating[]': ratings, // список ['safe', 'suggestive', ...]
     };
 
-    final parseURL = Uri(
-      scheme: 'https',
-      host: baseUrl.replaceAll('https://', ''),
-      path: '/manga',
-      queryParameters: queryParams,
+    final uri = Uri.https(
+      baseUrl.replaceAll('https://', ''),
+      '/manga',
+      queryParams,
     );
-    
-    final response = await http.get(parseURL);
+
+    final response = await http.get(uri);
     if (response.statusCode != 200) throw Exception('Failed to load manga');
     return await compute(_parseMangaList, response.body);
   }
@@ -69,13 +66,15 @@ String getPreferredDescription(Map<String, dynamic> attributes) {
 }
 
 Future<double> parseMangaScore(String id) async {
-  final Uri parseURL = Uri.parse('${MangadexController.baseUrl}/statistics/manga/$id');
+  final Uri parseURL = Uri.parse(
+    '${MangadexController.baseUrl}/statistics/manga/$id',
+  );
   final response = await http.get(parseURL);
   if (response.statusCode != 200) throw Exception('Failed to load manga');
   return jsonDecode(response.body)['statistics'][id]['rating']['bayesian'];
 }
 
-Future<List<Manga>> _parseMangaList (String body) async {
+Future<List<Manga>> _parseMangaList(String body) async {
   final json = jsonDecode(body);
   final List data = json['data'];
 
@@ -87,10 +86,10 @@ Future<List<Manga>> _parseMangaList (String body) async {
       final String id = manga['id'];
       final relationships = manga['relationships'];
       final score = await parseMangaScore(id);
-      
+
       final coverArt = relationships.firstWhere(
         (relationship) => relationship['type'] == 'cover_art',
-        orElse: () => null
+        orElse: () => null,
       )?['attributes']?['fileName'];
 
       final altTitles = (attributes['altTitles'] as List)
@@ -102,7 +101,11 @@ Future<List<Manga>> _parseMangaList (String body) async {
           .toList();
 
       return Manga(
-        source: Source(controller: MangadexController(), name: 'Mangadex', iconPath: 'lib/assets/icons/mangadex-logo.svg'),
+        source: Source(
+          controller: MangadexController(),
+          name: 'Mangadex',
+          iconPath: 'lib/assets/icons/mangadex-logo.svg',
+        ),
         sourceUrl: 'https://mangadex.org/title/$id',
         contentRating: ContentRating.fromApi(attributes['contentRating']),
         id: manga['id'],
@@ -111,12 +114,20 @@ Future<List<Manga>> _parseMangaList (String body) async {
         score: score,
         altTitles: altTitles,
         tags: tags,
-        lastChapter: (attributes['lastChapter'] ?? '').isNotEmpty ? attributes['lastChapter'] : 'N/A',
+        lastChapter: (attributes['lastChapter'] ?? '').isNotEmpty
+            ? attributes['lastChapter']
+            : 'N/A',
         status: attributes['status'],
-        year: (attributes['year'] != null && attributes['year'].toString().isNotEmpty) ? attributes['year'].toString()  : 'N/A',
-        coverUrl: coverArt != null ? '${MangadexController.coversUrl}/covers/$id/$coverArt.256.jpg' : ''
+        year:
+            (attributes['year'] != null &&
+                attributes['year'].toString().isNotEmpty)
+            ? attributes['year'].toString()
+            : 'N/A',
+        coverUrl: coverArt != null
+            ? '${MangadexController.coversUrl}/covers/$id/$coverArt.256.jpg'
+            : '',
       );
-    }).toList()
+    }).toList(),
   );
   return mangas;
 }
