@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:marquee/marquee.dart';
 
 Widget buildScrollingTitle(String text, TextStyle style, double maxWidth, BuildContext context) {
@@ -33,17 +34,24 @@ Widget buildScrollingTitle(String text, TextStyle style, double maxWidth, BuildC
   return GestureDetector(
     onTap: () {
       Clipboard.setData(ClipboardData(text: text));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          behavior: SnackBarBehavior.floating,
-          duration: Duration(seconds: 2),
-          showCloseIcon: true,
-          closeIconColor: Theme.of(context).colorScheme.onPrimary,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-          content: Text('Title copied', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
-        ),
+      Fluttertoast.showToast(
+        msg: "Message here",
+        gravity: ToastGravity.TOP,
+        backgroundColor: Colors.black87,
+        textColor: Colors.white,
       );
+
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     backgroundColor: Theme.of(context).colorScheme.primary,
+      //     behavior: SnackBarBehavior.floating,
+      //     duration: Duration(seconds: 2),
+      //     showCloseIcon: true,
+      //     closeIconColor: Theme.of(context).colorScheme.onPrimary,
+      //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      //     content: Text('Title copied', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+      //   ),
+      // );
     },
     child: child,
   );

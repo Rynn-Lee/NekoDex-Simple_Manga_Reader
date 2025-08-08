@@ -1,0 +1,53 @@
+import 'package:flutter_svg/flutter_svg.dart';
+
+const Map<String, String> mangaDexLangToCountryLowercase = {
+  'en': 'us',
+  'ja': 'jp',
+  'zh': 'cn',
+  'zh-hk': 'hk',
+  'zh-cn': 'cn',
+  'zh-ro': 'cn',
+  'zh-tw': 'tw',
+  'ko': 'kr',
+  'ko-ro': 'kr',
+  'fr': 'fr',
+  'de': 'de',
+  'es': 'es',
+  'es-la': 'mx',
+  'pt': 'pt',
+  'pt-br': 'br',
+  'ru': 'ru',
+  'uk': 'ua',
+  'pl': 'pl',
+  'it': 'it',
+  'ja-ro': 'jp',
+  'id': 'id',
+  'vi': 'vn',
+  'th': 'th',
+  'ar': 'sa',
+  'tr': 'tr',
+  'hi': 'in',
+  'bn': 'bd',
+  'ms': 'my',
+  'ro': 'ro',
+  'nl': 'nl',
+  'sv': 'se',
+  'fi': 'fi',
+  'no': 'no',
+  'he': 'il',
+  'cs': 'cz',
+  'el': 'gr',
+  'hu': 'hu',
+  'fa': 'ir',
+  'ta': 'lk',
+  'te': 'in',
+  'ml': 'in',
+  'sr': 'rs',
+  'hr': 'hr',
+  'bg': 'bg',
+};
+
+SvgPicture getFlag(String flag){
+  final flagIcon = mangaDexLangToCountryLowercase.containsKey(flag) ? mangaDexLangToCountryLowercase[flag] : flag;
+  return SvgPicture.asset('lib/assets/icons/flags/$flagIcon.svg', height: 18.0, width: 18.0);
+}

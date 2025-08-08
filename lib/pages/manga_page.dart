@@ -7,6 +7,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:neko_dex/models/manga_model.dart';
 import 'package:neko_dex/utils/capitalize_first_letter.dart';
+import 'package:neko_dex/utils/get_flag.dart';
 import 'package:neko_dex/widgets/build_scrolling_title.dart';
 import 'package:neko_dex/widgets/link_button.dart';
 
@@ -122,7 +123,8 @@ class _MangaPageState extends State<MangaPage> {
                                         )
                                       )
                                     ),
-                                  ],
+                                    mangaInfoRow(context, "Author: ", Expanded(child: Text(widget.manga.author, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold)))),
+                                 ],
                                 ),
                               ),
                             ),
@@ -150,7 +152,15 @@ class _MangaPageState extends State<MangaPage> {
                     3: Text('Comments'),
                   },
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.secondary,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(30),
+                        spreadRadius: 0,
+                        blurRadius: 2,
+                        offset: const Offset(0, 3),
+                      )
+                    ],
+                    color: Theme.of(context).colorScheme.secondary.withAlpha(255),
                     borderRadius: BorderRadius.only(bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12)),
                   ),
                   thumbDecoration: BoxDecoration(
@@ -175,39 +185,93 @@ class _MangaPageState extends State<MangaPage> {
     );
   }
 
-  Container moreInfo(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      margin: const EdgeInsets.only(top: 6.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.secondary,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Description", style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold
-          ),),
-          SizedBox(height: 12),
-          Markdown(
-            padding: EdgeInsets.zero,
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            data: widget.manga.description,
-            onTapLink: (value, url, title) => launchExternalUrl(url),
-            styleSheet: MarkdownStyleSheet(
-              p: TextStyle(
-                fontSize: 16,
-                color: Theme.of(context).colorScheme.onSecondary,
-                fontWeight: FontWeight.normal
-              ),
-            ),
+  Column moreInfo(BuildContext context) {
+    return Column(
+      children: [
+       Container(
+          padding: const EdgeInsets.all(16.0),
+          margin: const EdgeInsets.only(top: 6.0),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.secondary.withAlpha(255),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(30),
+                spreadRadius: 0,
+                blurRadius: 2,
+                offset: const Offset(0, 3),
+              )
+            ],
           ),
-        ],
-      ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Description", style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold
+              ),),
+              SizedBox(height: 12),
+              Markdown(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                data: widget.manga.description,
+                onTapLink: (value, url, title) => launchExternalUrl(url),
+                styleSheet: MarkdownStyleSheet(
+                  p: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).colorScheme.onSecondary,
+                    fontWeight: FontWeight.normal
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+       Container(
+          padding: const EdgeInsets.all(16.0),
+          margin: const EdgeInsets.only(top: 6.0),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.secondary.withAlpha(255),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                  color: Colors.black.withAlpha(30),
+                  spreadRadius: 0,
+                  blurRadius: 2,
+                  offset: const Offset(0, 3),
+              )
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Alternative titles", style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold
+              ),),
+              SizedBox(height: 12),
+              Column(
+                children: widget.manga.altTitles.map((item) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(borderRadius: BorderRadius.circular(6), child: getFlag(item.keys.first)),
+                        SizedBox(width: 10,),
+                        Expanded(child: Text(item.values.first)),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              )
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -219,7 +283,9 @@ class _MangaPageState extends State<MangaPage> {
   }
 
   Row mangaInfoRow(BuildContext context, String title, Widget info) {
-    return Row(children: [
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
       Text(
         title,
         style: TextStyle(

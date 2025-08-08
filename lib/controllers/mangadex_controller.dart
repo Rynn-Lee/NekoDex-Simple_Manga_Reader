@@ -15,7 +15,7 @@ class MangadexController extends MangaProvider {
 
     final queryParams = <String, dynamic>{
       'title': title,
-      'includes[]': ['cover_art'],
+      'includes[]': ['cover_art', 'author'],
       'limit': '10',
       'offset': '${page * 10}',
       'contentRating[]': ratings,
@@ -90,15 +90,18 @@ Future<List<Manga>> _parseMangaList(String body) async {
       final String id = manga['id'];
       final relationships = manga['relationships'];
       final score = await parseMangaScore(id);
+      final altTitles = (attributes['altTitles'] as List).cast<Map<String, dynamic>>();
 
       final coverArt = relationships.firstWhere(
         (relationship) => relationship['type'] == 'cover_art',
         orElse: () => null,
       )?['attributes']?['fileName'];
 
-      final altTitles = (attributes['altTitles'] as List)
-          .map((title) => title.values.first.toString())
-          .toList();
+      final author = relationships.firstWhere(
+        (relationship) => relationship['type'] == 'author',
+        orElse: () => null,
+      )?['attributes']?['name'];
+
 
       final tags = (attributes['tags'] as List)
           .map((tag) => tag['attributes']['name']['en'].toString())
@@ -118,6 +121,7 @@ Future<List<Manga>> _parseMangaList(String body) async {
         score: score,
         altTitles: altTitles,
         tags: tags,
+        author: author,
         lastChapter: (attributes['lastChapter'] ?? '').isNotEmpty
             ? attributes['lastChapter']
             : 'N/A',

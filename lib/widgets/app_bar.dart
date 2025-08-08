@@ -163,9 +163,20 @@ class _MyAppBarState extends State<MyAppBar> {
                 value: 'settings',
                 child: Row(
                   children: [
+                    // Icon(Icons.settings_rounded, color: Theme.of(context).colorScheme.onPrimary, size: 24),
+                    SvgPicture.asset(_selectedSource.iconPath, width: 24, height: 24),
+                    SizedBox(width: 8),
+                    Text('${_selectedSource.name} Settings'),
+                  ],
+                )
+              ),
+              PopupMenuItem(
+                value: 'settings',
+                child: Row(
+                  children: [
                     Icon(Icons.settings_rounded, color: Theme.of(context).colorScheme.onPrimary, size: 24),
                     SizedBox(width: 8),
-                    Text('More Settings'),
+                    Text('General Settings'),
                   ],
                 )
               ),

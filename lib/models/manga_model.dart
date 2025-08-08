@@ -17,12 +17,13 @@ class Manga {
   final String sourceUrl;
   final String title;
   final String description;
-  final List<String> altTitles;
+  final List<Map<dynamic, dynamic>> altTitles;
   final String status;
   final String year;
   final List<String> tags;
   final String coverUrl;
   final Source source;
+  final String author;
   final String lastChapter;
   final ContentRating contentRating;
   final double score;
@@ -38,6 +39,7 @@ class Manga {
     required this.tags,
     required this.coverUrl,
     required this.source,
+    required this.author,
     required this.lastChapter,
     required this.contentRating,
     required this.score
