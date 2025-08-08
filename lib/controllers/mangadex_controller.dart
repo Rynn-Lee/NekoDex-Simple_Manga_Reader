@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:neko_dex/stores/search_preferences.dart';
@@ -17,7 +18,7 @@ class MangadexController extends MangaProvider {
       'includes[]': ['cover_art'],
       'limit': '10',
       'offset': '${page * 10}',
-      'contentRating[]': ratings, // список ['safe', 'suggestive', ...]
+      'contentRating[]': ratings,
     };
 
     final uri = Uri.https(
@@ -30,6 +31,9 @@ class MangadexController extends MangaProvider {
     if (response.statusCode != 200) throw Exception('Failed to load manga');
     return await compute(_parseMangaList, response.body);
   }
+
+  @override
+  Widget searchProviderPreferences() => const Text('');
 }
 
 String getPreferredTitle(Map<String, dynamic> attributes) {

@@ -1,120 +1,134 @@
 import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:neko_dex/models/manga_model.dart';
 import 'package:neko_dex/utils/capitalize_first_letter.dart';
 import 'package:neko_dex/widgets/build_scrolling_title.dart';
 import 'package:neko_dex/widgets/link_button.dart';
 
-class MangaPage extends StatelessWidget {
+class MangaPage extends StatefulWidget {
   final Manga manga;
   const MangaPage({super.key, required this.manga});
 
   @override
+  State<MangaPage> createState() => _MangaPageState();
+}
+
+class _MangaPageState extends State<MangaPage> {
+  int _selectedTab = 1;
+
+  @override
   Widget build(BuildContext context) {
-    final statusColor = parseMangaStatus(manga.status);
+    final statusColor = parseMangaStatus(widget.manga.status);
 
     return Scaffold(
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 320,
+            expandedHeight: 356,
             pinned: true,
             title: SizedBox(
               height: 26,
-              child: buildScrollingTitle(manga.title, TextStyle(fontSize: 20, color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold), 290, context),
+              child: buildScrollingTitle(widget.manga.title, TextStyle(fontSize: 20, color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold), 290, context),
             ),
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
                 children: [
                   backgroundCoverArt(context),
                   Positioned(
-                    bottom: 30,
+                    bottom: 20,
                     left: 10,
                     right: 10,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Column(
                       children: [
-                        SizedBox(
-                          width: 160,
-                          height: 230,
-                          child: coverArtHero(statusColor, context)
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 8.0, top: 8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                mangaInfoRow(context, 'Source: ', Row(children: [
-                                  SvgPicture.asset(manga.source.iconPath, height: 20.0, width: 20.0),
-                                  SizedBox(width: 8),
-                                  Text(manga.source.name, style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold)),
-                                  SizedBox(width: 4),
-                                  OpenLinkButton(url: manga.sourceUrl)
-                                ],)),
-                                mangaInfoRow(context, 'Status: ', Row(
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: 160,
+                              height: 230,
+                              child: coverArtHero(statusColor, context)
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 14.0, top: 8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                  Icon(
-                                    Icons.circle_rounded,
-                                    size: 10,
-                                    color: statusColor.color
-                                  ),
-                                  SizedBox(width: 4),
-                                  Text(
-                                    capitalizeFirstLetter(manga.status),
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Theme.of(context).colorScheme.onPrimary,
-                                      fontWeight: FontWeight.bold
+                                    mangaInfoRow(context, 'Source: ', Row(children: [
+                                      SvgPicture.asset(widget.manga.source.iconPath, height: 20.0, width: 20.0),
+                                      SizedBox(width: 8),
+                                      Text(widget.manga.source.name, style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold)),
+                                      SizedBox(width: 4),
+                                      OpenLinkButton(url: widget.manga.sourceUrl)
+                                    ],)),
+                                    mangaInfoRow(context, 'Status: ', Row(
+                                      children: [
+                                      Icon(
+                                        Icons.circle_rounded,
+                                        size: 10,
+                                        color: statusColor.color
+                                      ),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        capitalizeFirstLetter(widget.manga.status),
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Theme.of(context).colorScheme.onPrimary,
+                                          fontWeight: FontWeight.bold
+                                        ),
+                                      ),
+                                      ]
+                                    )
                                     ),
-                                  ),
-                                  ]
-                                )
-                                ),
-                                mangaInfoRow(context, 'Year: ', Text(manga.year.toString(), style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold))),
-                                mangaInfoRow(context, 'Rating: ', Padding(padding: const EdgeInsets.only(right: 2.0),
-                                  child: Container(
-                                    padding: EdgeInsets.only(left: 4, top: 4, right: 4, bottom: 4),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(4),
-                                      color: manga.contentRating.color.withAlpha(220),
-                                    ),
-                                    child: RichText(
-                                      text: TextSpan(
-                                      text: manga.contentRating.displayName.text,
-                                      style: TextStyle(color: Theme.of(context).colorScheme.onTertiary),
+                                    mangaInfoRow(context, 'Year: ', Text(widget.manga.year.toString(), style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold))),
+                                    mangaInfoRow(context, 'Rating: ', Padding(padding: const EdgeInsets.only(right: 2.0),
+                                      child: Container(
+                                        padding: EdgeInsets.only(left: 4, top: 4, right: 4, bottom: 4),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(4),
+                                          color: widget.manga.contentRating.color.withAlpha(220),
+                                        ),
+                                        child: RichText(
+                                          text: TextSpan(
+                                          text: widget.manga.contentRating.displayName.text,
+                                          style: TextStyle(color: Theme.of(context).colorScheme.onTertiary),
+                                          )
+                                        ),
+                                      )
+                                    )),
+                                    mangaInfoRow(context, 'Score: ', Container(padding: EdgeInsets.only(left: 2, top: 1, right: 4, bottom: 1),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(4),
+                                        color: Theme.of(context).colorScheme.primary.withAlpha(200),
+                                      ),
+                                      child: Row(children: [
+                                          Icon(Icons.star_outline_rounded, color: Theme.of(context).colorScheme.onPrimary, size: 20),
+                                          Text(widget.manga.score.toStringAsFixed(2), style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold))
+                                        ]
+                                      ),
+                                    )),
+                                    mangaInfoRow(context, 'Last chapter: ', Text(
+                                      widget.manga.lastChapter,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Theme.of(context).colorScheme.onPrimary,
+                                        fontWeight: FontWeight.bold
+                                        )
                                       )
                                     ),
-                                  )
-                                )),
-                                mangaInfoRow(context, 'Score: ', Container(padding: EdgeInsets.only(left: 2, top: 1, right: 4, bottom: 1),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(4),
-                                    color: Theme.of(context).colorScheme.primary.withAlpha(200),
-                                  ),
-                                  child: Row(children: [
-                                      Icon(Icons.star_outline_rounded, color: Theme.of(context).colorScheme.onPrimary, size: 20),
-                                      Text(manga.score.toStringAsFixed(2), style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold))
-                                    ]
-                                  ),
-                                )),
-                                mangaInfoRow(context, 'Last chapter: ', Text(
-                                  manga.lastChapter,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Theme.of(context).colorScheme.onPrimary,
-                                    fontWeight: FontWeight.bold
-                                    )
-                                  )
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
-                          ),
+                          ],
                         ),
+                        tagList(context, widget.manga.tags)
                       ],
                     )
                   )
@@ -124,25 +138,83 @@ class MangaPage extends StatelessWidget {
           ),
           SliverToBoxAdapter(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(4),
+                CustomSlidingSegmentedControl<int>(
+                  fixedWidth: (MediaQuery.of(context).size.width / 3).floorToDouble()-1,
+                  initialValue: _selectedTab,
+                  children: {
+                    1: Text('Description'),
+                    2: Text('Chapters'),
+                    3: Text('Comments'),
+                  },
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.secondary,
-                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12))
+                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12)),
                   ),
-                  child: tagList(context, manga.tags),
+                  thumbDecoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.secondary.withAlpha(100),
+                    border: Border.all(color: Theme.of(context).colorScheme.onSecondary.withAlpha(100)),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  duration: Duration(milliseconds: 400),
+                  curve: Curves.ease,
+                  onValueChanged: (v) {
+                    setState(()=> _selectedTab = v);
+                  },
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Text(manga.description, style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSecondary,)),
-                ),
+                if (_selectedTab == 1) moreInfo(context)
+                else if (_selectedTab == 2) chapters(context)
+                else if (_selectedTab == 3) chapters(context)
               ],
             ),
           )
         ]
       )
+    );
+  }
+
+  Container moreInfo(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      margin: const EdgeInsets.only(top: 6.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.secondary,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Description", style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold
+          ),),
+          SizedBox(height: 12),
+          Markdown(
+            padding: EdgeInsets.zero,
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            data: widget.manga.description,
+            onTapLink: (value, url, title) => launchExternalUrl(url),
+            styleSheet: MarkdownStyleSheet(
+              p: TextStyle(
+                fontSize: 16,
+                color: Theme.of(context).colorScheme.onSecondary,
+                fontWeight: FontWeight.normal
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Padding chapters(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Text('chapters'),
     );
   }
 
@@ -168,7 +240,7 @@ class MangaPage extends StatelessWidget {
       ImageFiltered(
         imageFilter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
         child: CachedNetworkImage(
-          imageUrl: manga.coverUrl,
+          imageUrl: widget.manga.coverUrl,
           memCacheHeight: 256,
           memCacheWidth: 190,
           width: 200,
@@ -208,14 +280,14 @@ class MangaPage extends StatelessWidget {
 
   Widget coverArtHero(MangaStatus statusColor, BuildContext context, {double? width, double? height}) {
     return Hero(
-      tag: manga.id,
+      tag: widget.manga.id,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: Stack(
           children: [
             Positioned.fill(
               child: CachedNetworkImage(
-                imageUrl: manga.coverUrl,
+                imageUrl: widget.manga.coverUrl,
                 fit: BoxFit.cover,
                 memCacheHeight: 256,
                 memCacheWidth: 190,
@@ -236,79 +308,44 @@ class MangaPage extends StatelessWidget {
                 ),
               ),
             ),
-            // Полоса с текстом внизу
-            // Positioned(
-            //   bottom: 0,
-            //   right: 0,
-            //   left: 0,
-            //   child: Container(
-            //     decoration: BoxDecoration(
-            //       color: statusColor.color.withAlpha(200),
-            //     ),
-            //     child: Material(
-            //       color: Colors.transparent,
-            //       child: Text(
-            //         capitalizeFirstLetter(manga.status),
-            //         textAlign: TextAlign.center,
-            //         style: TextStyle(
-            //           fontSize: 12,
-            //           color: Theme.of(context).colorScheme.onTertiary,
-            //           fontWeight: FontWeight.bold,
-            //         ),
-            //       ),
-            //     ),
-            //   ),
-            // ),
           ],
         ),
       ),
     );
   }
- 
-  SingleChildScrollView tagList(BuildContext context, List<String> tags) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.only(top: 4, bottom: 4, left: 4),
-      child: Row(
-        children: [
-          ...tags.map((tag) {
-            return Padding(
-              padding: const EdgeInsets.only(right: 2.0),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(4),
-                  color: Theme.of(context).colorScheme.onSecondary,
+
+  Container tagList(BuildContext context, List<String> tags) {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(top: 10),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+      ),
+      child: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.only(top: 4, bottom: 4, left: 4),
+        child: Row(
+          children: [
+            ...tags.map((tag) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 2.0),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    color: Theme.of(context).colorScheme.onSecondary,
+                  ),
+                  child: Text(
+                    tag,
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+                  ),
                 ),
-                child: Text(
-                  tag,
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
-                ),
-              ),
-            );
-          })
-        ],
+              );
+            })
+          ],
+        ),
       ),
     );
   }
 }
-
-
-
-// Row(
-//   mainAxisAlignment: MainAxisAlignment.center,
-//   children: manga.tags.map((tag) => Padding(
-//     padding: const EdgeInsets.only(right: 4.0),
-//     child: Container(
-//       padding: EdgeInsets.only(left: 4, top: 2, right: 4, bottom: 2),
-//       decoration: BoxDecoration(
-//         borderRadius: BorderRadius.circular(4),
-//         color: Theme.of(context).colorScheme.tertiary.withAlpha(180),
-//       ),
-//       child: Text(
-//         tag,
-//         style: TextStyle(color: Theme.of(context).colorScheme.onTertiary),
-//       ),
-//     ),
-//   )).toList(),
-// )

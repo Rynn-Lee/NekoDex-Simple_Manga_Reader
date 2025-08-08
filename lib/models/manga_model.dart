@@ -46,6 +46,7 @@ class Manga {
 
 abstract class MangaProvider {
   Future<List<Manga>> searchManga(String title, int page);
+  Widget searchProviderPreferences();
 }
 
 enum ContentRating {

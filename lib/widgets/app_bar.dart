@@ -155,7 +155,7 @@ class _MyAppBarState extends State<MyAppBar> {
                   children: [
                     Icon(themeNotifier.themeMode == ThemeMode.dark ? Icons.dark_mode_rounded : Icons.light_mode_rounded, color: Theme.of(context).colorScheme.onPrimary, size: 24),
                     SizedBox(width: 8),
-                    Text('Сменить тему'),
+                    Text('Toggle Theme'),
                   ],
                 )
               ),
@@ -165,7 +165,7 @@ class _MyAppBarState extends State<MyAppBar> {
                   children: [
                     Icon(Icons.settings_rounded, color: Theme.of(context).colorScheme.onPrimary, size: 24),
                     SizedBox(width: 8),
-                    Text('Все настройки'),
+                    Text('More Settings'),
                   ],
                 )
               ),
