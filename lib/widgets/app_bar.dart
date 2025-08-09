@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:neko_dex/controllers/mangadex_controller.dart';
+import 'package:neko_dex/controllers/mangadex_settings_page.dart';
 import 'package:neko_dex/models/manga_model.dart';
 import 'package:neko_dex/theme/theme_motifier.dart';
 import 'package:provider/provider.dart';
@@ -26,8 +27,8 @@ class _MyAppBarState extends State<MyAppBar> {
   late Source _selectedSource;
 
   final List<Source> _sources = [
-    Source(name: "Mangadex", iconPath: "lib/assets/icons/mangadex-logo.svg", controller: MangadexController()),
-    Source(name: "MangaLib [ru]", iconPath: "lib/assets/icons/mangalib-logo.svg", controller: MangadexController()),
+    Source(name: "Mangadex", iconPath: "lib/assets/icons/mangadex-logo.svg", controller: MangadexController(), settingsPage: MangadexSettingsPage()),
+    Source(name: "MangaLib [ru]", iconPath: "lib/assets/icons/mangalib-logo.svg", controller: MangadexController(), settingsPage: MangadexSettingsPage()),
   ];
   
   @override
@@ -145,6 +146,9 @@ class _MyAppBarState extends State<MyAppBar> {
                 case 'settings':
                   Navigator.pushNamed(context, '/settings');
                   break;
+                case 'providerSettings':
+                  Navigator.pushNamed(context, '/mangaProviderSettings', arguments: _selectedSource.settingsPage);
+                  break;
                 default:
               }
             },
@@ -160,7 +164,7 @@ class _MyAppBarState extends State<MyAppBar> {
                 )
               ),
               PopupMenuItem(
-                value: 'settings',
+                value: 'providerSettings',
                 child: Row(
                   children: [
                     // Icon(Icons.settings_rounded, color: Theme.of(context).colorScheme.onPrimary, size: 24),

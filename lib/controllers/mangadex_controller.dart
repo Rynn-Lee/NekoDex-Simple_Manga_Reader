@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
+import 'package:neko_dex/controllers/mangadex_settings_page.dart';
 import 'package:neko_dex/stores/search_preferences.dart';
 import 'dart:convert';
 import '../models/manga_model.dart';
@@ -8,17 +8,27 @@ import '../models/manga_model.dart';
 class MangadexController extends MangaProvider {
   static String baseUrl = 'https://api.mangadex.org';
   static String coversUrl = 'https://uploads.mangadex.org';
+  static Map<String, String> tags = {};
+  List<String> values = [];
+  MangadexController() {
+    _initTags();
+  }
+
+  Future<void> _initTags() async {
+    tags = await fetchTags();
+  }
 
   @override
   Future<List<Manga>> searchManga(String title, int page) async {
     final ratings = SearchPreferences.instance.selectedContentRatings;
-
+    // final includeTags = parseTags(includeTagsController.text);
     final queryParams = <String, dynamic>{
       'title': title,
       'includes[]': ['cover_art', 'author'],
-      'limit': '10',
-      'offset': '${page * 10}',
+      'limit': '20',
+      'offset': '${page * 20}',
       'contentRating[]': ratings,
+      // 'includedTags[]': includeTags
     };
 
     final uri = Uri.https(
@@ -27,13 +37,34 @@ class MangadexController extends MangaProvider {
       queryParams,
     );
 
+    print("URI: $uri");
+
     final response = await http.get(uri);
     if (response.statusCode != 200) throw Exception('Failed to load manga');
     return await compute(_parseMangaList, response.body);
   }
 
-  @override
-  Widget searchProviderPreferences() => const Text('');
+}
+
+// List<String> parseTags(String userTags) {
+//   if(userTags.isEmpty) return [];
+//   return userTags.split(',').map((item) => tags[item.trim()] as String).toList();
+// }
+
+Future<Map<String, String>> fetchTags() async {
+  final Uri tagRetrieveUrl = Uri.parse('https://api.mangadex.org/manga/tag');
+
+  final response = await http.get(tagRetrieveUrl);
+  if (response.statusCode != 200) throw Exception('Failed to load manga tags');
+  final data = jsonDecode(response.body)['data'] as List;
+  final result = <String, String>{};
+  for (final tag in data) {
+    final id = (tag['id'] as String).toLowerCase();
+    final nameMap = Map<String, dynamic>.from(tag['attributes']['name']);
+    final nameEn = nameMap['en'].toLowerCase() as String? ?? '';
+    result[nameEn] = id;
+  }
+  return result;
 }
 
 String getPreferredTitle(Map<String, dynamic> attributes) {
@@ -110,6 +141,7 @@ Future<List<Manga>> _parseMangaList(String body) async {
       return Manga(
         source: Source(
           controller: MangadexController(),
+          settingsPage: MangadexSettingsPage(),
           name: 'Mangadex',
           iconPath: 'lib/assets/icons/mangadex-logo.svg',
         ),

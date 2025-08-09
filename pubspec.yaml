@@ -46,6 +46,7 @@ dependencies:
   custom_sliding_segmented_control: ^1.8.5
   flutter_markdown: ^0.7.7+1
   fluttertoast: ^8.2.12
+  material_tag_editor: ^0.1.2
 
 dev_dependencies:
   flutter_test:

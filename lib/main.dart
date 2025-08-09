@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:neko_dex/app_home.dart';
 import 'package:neko_dex/models/manga_model.dart';
+import 'package:neko_dex/pages/mangaProviderSettings.dart';
 import 'package:neko_dex/pages/manga_page.dart';
 import 'package:neko_dex/pages/settings_page.dart';
 import 'package:neko_dex/stores/search_preferences.dart';
@@ -12,7 +13,6 @@ import 'package:provider/provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SearchPreferences.instance.init();
-
   runApp(
     ChangeNotifierProvider(create: (_) => ThemeNotifier(), child: NekoDex()),
   );
@@ -50,9 +50,12 @@ class _NekoDexState extends State<NekoDex> with TickerProviderStateMixin {
         routes: {
           '/': (context) => AppHome(),
           '/settings': (context) => SettingsPage(),
+          '/mangaProviderSettings': (context) {
+            final Widget child = ModalRoute.of(context)!.settings.arguments as Widget;
+            return MangaProviderSettingsPage(child: child);
+          },
           '/manga': (context) {
-            final Manga manga =
-                ModalRoute.of(context)!.settings.arguments as Manga;
+            final Manga manga = ModalRoute.of(context)!.settings.arguments as Manga;
             return MangaPage(manga: manga);
           },
         },

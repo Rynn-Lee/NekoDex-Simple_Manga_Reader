@@ -4,11 +4,13 @@ class Source {
   final String name;
   final String iconPath;
   final MangaProvider controller;
+  final Widget settingsPage;
 
   Source({
     required this.name,
     required this.iconPath,
-    required this.controller
+    required this.controller,
+    required this.settingsPage
   });
 }
 
@@ -17,7 +19,6 @@ class Manga {
   final String sourceUrl;
   final String title;
   final String description;
-  final List<Map<dynamic, dynamic>> altTitles;
   final String status;
   final String year;
   final List<String> tags;
@@ -27,13 +28,13 @@ class Manga {
   final String lastChapter;
   final ContentRating contentRating;
   final double score;
+  final List<Map<String, dynamic>> altTitles;
 
   Manga({
     required this.id,
     required this.sourceUrl,
     required this.title,
     required this.description,
-    required this.altTitles,
     required this.status,
     required this.year,
     required this.tags,
@@ -42,13 +43,13 @@ class Manga {
     required this.author,
     required this.lastChapter,
     required this.contentRating,
-    required this.score
+    required this.score,
+    required this.altTitles,
   });
 }
 
 abstract class MangaProvider {
   Future<List<Manga>> searchManga(String title, int page);
-  Widget searchProviderPreferences();
 }
 
 enum ContentRating {
